@@ -1,0 +1,6 @@
+var a = 4;
+var b = 7;
+fun swap(Int x, Int y) = (y, x);
+var p = swap(a,b);
+var p1 = swap(p);
+p1

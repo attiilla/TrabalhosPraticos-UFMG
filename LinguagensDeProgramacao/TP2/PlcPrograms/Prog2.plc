@@ -1,0 +1,15 @@
+fun inc (Int x) = x + 1;
+fun add (Int x, Int y) = x + y;
+fun cadd (Int x) = fn (Int y) => x + y end;
+var y = add(3, inc(4));
+var x = cadd(3)(7-y);
+var z = x * 3;
+fun rec fac (Int n) : Int =
+  match n with
+  | 0 -> 1
+  | 1 -> 1
+  | _ -> n * fac(n - 1)
+  end
+;
+print x; print y;
+x :: y :: z :: fac(z) :: ([Int] [])
