@@ -1,0 +1,10 @@
+fun f0() = 5 ;
+fun f1(Int x) = 0 < x ;
+fun f2(Int x, Bool b) =
+  match b with
+  | true -> {x + 1}
+  | _    -> x
+  end
+;
+fun f3(Int n, Int x, Int y) = n * x + y ;
+f3(f0(), f2(3,true), 10)

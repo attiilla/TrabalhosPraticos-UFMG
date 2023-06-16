@@ -1,0 +1,15 @@
+var E = ([Int] []);
+fun reverse ([Int] s) = {
+  fun rec rev ([Int] s1, [Int] s2): [Int] =
+    match s1 with
+    | E -> s2
+    | _ -> {
+             var h = hd(s1);
+             var t = tl(s1);
+             rev(t, h::s2)
+           }
+    end
+  ;
+  rev(s, E)
+};
+reverse (1::2::3::E)

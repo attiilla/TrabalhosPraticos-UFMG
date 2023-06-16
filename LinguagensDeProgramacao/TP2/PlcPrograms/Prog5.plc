@@ -1,0 +1,11 @@
+fun twice (Int -> Int f) = fn (Int x) => f(f(x)) end ;
+fun rec map (Int -> Int f) : ([Int] -> [Int]) =
+  fn ([Int] s) =>
+    if ise(s) then s else f(hd(s)) :: map(f)(tl(s))
+  end ;
+fun square (Int x) = x * x ;
+fun inc (Int x) = x + 1 ;
+var E = ([Int] []) ;
+var s1 = map (fn (Int x) => 2*x end) (10::20::30::E) ;
+var s2 = map (twice(inc)) (s1) ;
+(s1, s2)

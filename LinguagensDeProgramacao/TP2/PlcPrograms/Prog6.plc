@@ -1,0 +1,20 @@
+fun rec len([Int] s): Int =
+  match s with
+  | E -> 0
+  | _ -> 1 + len(tl(s))
+  end
+;
+fun next(Int x) = x + 1;
+fun rec map(Int -> Int f, [Int] s):[Int] = {
+  match s with
+  | E -> E
+  | _ -> {
+           var x = hd(s);
+           var t = tl(s);
+           f(x) :: map(f, t)
+         }
+  end
+};
+print map(next, 1::2::3::E)
+;
+map(fn (Int x) => x * x end, 1::2::3::4::E)

@@ -1,0 +1,35 @@
+1. 7 : Int
+2. 120 : Int
+3. <fun> : Int -> Int
+4. [2, 8, 6, 720, ] : [Int]
+5. [2, 8, 6, 720, ] : [Int]
+6. [3, 2, 1, ] : [Int]
+7. [3, 2, 1, ] : [Int]
+8. [1, 2, 3, ] : [Int]
+9. ([20, 40, 60, ], [22, 42, 62, ], ) : ([Int], [Int], )
+10. 1 : Int
+11. true : Bool
+12. <fun> : (Int -> Int) -> Int
+13. <fun> : (Int -> Int) -> Int
+14. [1, 2, ] : [Int]
+15. (1, false, ) : (Int, Bool, )
+16. 8 : Int
+17. (5, ~3, ) : (Int, Int, )
+18. (5, ~3, (5, 5, ), ) : (Int, Int, (Int, Int, ), )
+19. 7 : Int
+20. 4 : Int
+21. false : Bool
+22. () : Nil
+23. 21 : Int
+24. 9 : Int
+25. (4, 7, ) : (Int, Int, )
+26. 30 : Int
+27. 9 : Int
+28. 10 : Int
+29. 1 : Int
+30. 12 : Int
+31. 33 : Int
+32. 121393 : Int
+33. 10 : Int
+34. true : Bool
+35. 6 : Int
