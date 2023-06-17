@@ -9,30 +9,59 @@
 #include <arpa/inet.h> //inet_pton
 #include <netinet/in.h> 
 #include <pthread.h>
+#include <time.h>
+
+struct time GetTime(){
+    struct time ans;
+    time_t rawtime;
+    struct tm* timeinfo;
+    time(&rawtime);                 // Get current time
+    timeinfo = localtime(&rawtime);
+    ans.hour = timeinfo->tm_hour;
+    ans.minute = timeinfo->tm_min;
+}
+
+void ServerPrint(struct streamHeader s, struct time now){
+    switch(s.code){
+        case 2:
+            printf("User %02d removed\n",s.idSender+1);
+        case 6:
+            if(s.idRec<0){
+                printf("[%02d:%02d] %02d: %s",now.hour, now.minute, s.idSender+1, s.Message);
+            }
+        
+    }
+}
 
 
 void* Receiver(void* arg){
     pthread_detach(pthread_self());
     int data;
+    struct time now;
     struct Connection* conn = (struct Connection*) arg;
+    int sock = conn->socketDesc;
+    uint8_t id = conn->userID;
+    struct queue* q = conn->queue;
     char buff[BUFFER_SIZE];
     struct streamHeader s;
     while(1){
-        data = recv(conn->socketDesc,buff,BUFFER_SIZE,0);
+        data = recv(sock,buff,BUFFER_SIZE,0);
         s = ToStreamHead(buff);
         printHeader(s);
-        /*
         switch (s.code) {
             /*case 1:
                 break;        //Código 1 deve ser resolvido antes da abertura da thread
+            */
             case 2:
+                now = GetTime();
                 //Printa aqui
-                //Printa no usuário que saiu
-                //Fecha conexão
-                //avisa aos outros usuários
+                ServerPrint(s,now);
+                InitHeader(&s,8,0,id,"Code\n01: \"Removed Successfully\"");
+                //Coloca na fila a tarefa a realizar
+                EnQueue(&q[id],s);
                 break;
             case 4:
-
+                
                 break;
             case 6:
                 break;
@@ -40,7 +69,7 @@ void* Receiver(void* arg){
                 break;
             case 8:
                 break;
-        }*/
+        }
     }
     return NULL;
 }
@@ -135,9 +164,9 @@ void Server(uint8_t v, char* param){
             close(userSock);
             *userCount--;
         } else {        
-            InitConn(&dataHead,userSock,connectedIDs,&dataQueue,userCount);//carrega em hand os dados do usuário que devem ser passados para a thread
+            InitConn(&dataHead,userSock,connectedIDs,&dataQueue,userCount);//carrega em dataHead os dados do usuário que devem ser passados para a thread
             threadRec = pthread_create(&threadIDs[dataHead.userID],NULL,Receiver,&dataHead);
-            threadSend = pthread_create(&threadIDs[dataHead.userID]+MAX_USERS,NULL,Sender,&dataHead);
+            threadSend = pthread_create(&threadIDs[dataHead.userID+MAX_USERS],NULL,Sender,&dataHead);
             if(threadRec!=0){
                 printf("Erro ao abrir a thread %lu\n",(unsigned long int) dataHead.userID);
                 connectedIDs[dataHead.userID] = -1;

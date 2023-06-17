@@ -11,10 +11,11 @@
 #define MAX_PENDING 30
 #define MAX_USERS 15
 void InitThreadID(pthread_t* t){
-    for(int i=0;i<MAX_USERS;i++){
+    for(int i=0;i<MAX_USERS*2;i++){
         t[i] = i;
     }
 }
+
 
 void InitIdList(uint16_t* ids){
     for(int i = 0;i<MAX_USERS;i++){
@@ -31,6 +32,11 @@ uint16_t newID(uint16_t* arr){
     }
     return -1;
 }
+
+struct time{
+    uint8_t hour;
+    uint8_t minute;
+};
 
 struct queue{
     struct cell* first;
@@ -125,14 +131,7 @@ struct streamHeader deQueue(struct queue* fila){
     return *ans;
 }
 
-void InitHeader(struct streamHeader* h, int c, int s, int r, char* m){
-    h->code = c;
-    h->idSender = s;
-    h->idRec = r;
-    strcpy(h->Message,m);
-}
-
-void InitHeaderTest(struct streamHeader* h, int c, int s, int r, const char* m){
+void InitHeader(struct streamHeader* h, int c, int s, int r, const char* m){
     h->code = c;
     h->idSender = s;
     h->idRec = r;
