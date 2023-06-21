@@ -12,11 +12,6 @@ exception NotFunc
 exception ListOutOfRange
 exception OpNonList
 
-
-(*Regras para implementar: *)
-(*13,25,26*)
-
-
 fun teval (e: expr) (env: plcType env) :  plcType =
   let
     val empty_sequence : expr list = [];
@@ -68,24 +63,32 @@ fun teval (e: expr) (env: plcType env) :  plcType =
             raise DiffBrTypes 
           else
               teval a env
-      |Match(ex,ls) =>
+      |Match(ex,ls) =>                    (*Regra 13*)
         let
-          fun checkListType (l: ('a option*'a) list) : bool =
+          fun checkListType (l: (expr option*expr) list) : bool =
           if l = nil 
             then 
               true 
             else
               case #1(hd l) of 
-                 Some(e) => if (teval ex env)=(teval e env)
+                 SOME(e) => if (teval ex env)=(teval e env)
                   then
                     checkListType (tl l)
                   else
                     false
-                |None => true
+                |None => true;
+          fun checkListReturnType [] = true
+          | checkListReturnType (_::[]) = true
+          | checkListReturnType ((_, e1)::(a, e2)::t) =
+            if (teval e1 env) = (teval e2 env)
+              then
+                checkListReturnType((a,e2)::t)
+              else
+                false
         in
-          if checkListType
+          if checkListType ls
             then
-
+              teval (#2(hd ls)) env
             else
               raise MatchCondTypesDiff
         end
@@ -145,16 +148,23 @@ fun teval (e: expr) (env: plcType env) :  plcType =
                     raise NotEqTypes
                   else
                     BoolT)
+            |(";",_,t2) => t2             (*Regra 26*)
             |(_,_,_) => raise UnknownType
         end
-      |Item(i,List(exp_l)) => 
+      |Item(i,List(exp_l)) =>             (*Regra 25*)
         let
-          fun select_element(k: Int, l: 'a list) = 
-          if k=1
-            then hd l
-            else select_element(k-1,tl l)
+          fun select_element (k: int, l: expr list): expr =
+          if l = [] 
+            then
+              raise ListOutOfRange
+            else
+              if k=1
+                then 
+                  hd l
+                else 
+                  select_element((k-1),(tl l))
         in
-          select_element(i,(teval List(exp_l) env))
+          teval (select_element(i,exp_l)) env
         end
-      |(_) => IntT
-  end
+      |(_) => raise UnknownType
+    end
