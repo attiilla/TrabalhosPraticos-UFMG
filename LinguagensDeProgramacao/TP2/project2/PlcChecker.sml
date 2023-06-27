@@ -1,3 +1,5 @@
+(* PlcChecker *)
+
 exception EmptySeq
 exception UnknownType
 exception NotEqTypes
@@ -5,7 +7,6 @@ exception WrongRetType
 exception DiffBrTypes
 exception IfCondNotBool
 exception NoMatchResults
-exception MatchResTypeDiff
 exception MatchCondTypesDiff
 exception CallTypeMisM
 exception NotFunc
@@ -13,29 +14,29 @@ exception ListOutOfRange
 exception OpNonList
 
 fun getItemType (n:int, l:plcType list) =
-    case (n, l) of
+   case (n, l) of
           (_, []) => raise ListOutOfRange
         | (1, b) => hd b
-        | (a, b) => getItemType (a-1, tl b); 
+        | (a, b) => getItemType (a-1, tl b);
 
 
 fun teval (e: expr) (env: plcType env) :  plcType =
-  let 
-    val empty_sequence : expr list = []; 
+  let
+    val empty_sequence : expr list = [];
     val unity_type : plcType list = []
-  in  
+  in
     case e of
        Var(a) => lookup env a (*Regra 1*)
       |ConB(_) => BoolT (*Regra 2*)
-      |ConI(_) => IntT (*Regras 3, 4*) 
+      |ConI(_) => IntT (*Regras 3, 4*)
       |List(l) => if l=empty_sequence
         then                  (*Regra 5*)
           ListT(unity_type)
-        else                  (*Regra 6*)    
+        else                  (*Regra 6*)
           let
-            fun inverse_map fun_list e = 
+            fun inverse_map fun_list e =
               case fun_list of
-              nil => nil 
+              nil => nil
               |(h::t) => (h e)::(inverse_map t e)
           in
             ListT(inverse_map (map teval l) env)
@@ -49,9 +50,9 @@ fun teval (e: expr) (env: plcType env) :  plcType =
         else
           raise WrongRetType
       |Anon(t,strarg,e1) => (*Regra 10*)
-      let 
+      let
         val t2 = teval e1 ((strarg,t)::env)
-      in  
+      in
         FunT(t,t2)
       end
       |Call(e1,e2) =>       (*Regra 11*)
@@ -93,6 +94,7 @@ fun teval (e: expr) (env: plcType env) :  plcType =
         in
           if checkListType ls
             then
+              if (ls = []) then raise NoMatchResults else
               teval (#2(hd ls)) env
             else
               raise MatchCondTypesDiff
@@ -120,7 +122,7 @@ fun teval (e: expr) (env: plcType env) :  plcType =
               then
                 BoolT
               else
-                raise CallTypeMisM
+                raise UnknownType
             |("::",t1,SeqT(t2)) => if t2=t1     (*Regra 21*)
               then
                 SeqT(t2)
