@@ -12,11 +12,18 @@ exception NotFunc
 exception ListOutOfRange
 exception OpNonList
 
+fun getItemType (n:int, l:plcType list) =
+    case (n, l) of
+          (_, []) => raise ListOutOfRange
+        | (1, b) => hd b
+        | (a, b) => getItemType (a-1, tl b); 
+
+
 fun teval (e: expr) (env: plcType env) :  plcType =
-  let
-    val empty_sequence : expr list = [];
+  let 
+    val empty_sequence : expr list = []; 
     val unity_type : plcType list = []
-  in
+  in  
     case e of
        Var(a) => lookup env a (*Regra 1*)
       |ConB(_) => BoolT (*Regra 2*)
@@ -24,59 +31,57 @@ fun teval (e: expr) (env: plcType env) :  plcType =
       |List(l) => if l=empty_sequence
         then                  (*Regra 5*)
           ListT(unity_type)
-        else                  (*Regra 6*)      
+        else                  (*Regra 6*)    
           let
             fun inverse_map fun_list e = 
               case fun_list of
-              nil => nil
+              nil => nil 
               |(h::t) => (h e)::(inverse_map t e)
-          in 
+          in
             ListT(inverse_map (map teval l) env)
           end
       |ESeq(SeqT(l)) => SeqT(l)             (*Regra 7*)
       |Let(s,e1,e2) => teval e2 ((s,(teval e1 env))::env)     (*Regra 8*)
-      |Letrec(strfun, f_tp, strarg, arg_tp, e1, e2) =>        (*Regra 9*)
+      |Letrec(strfun, arg_tp, strarg, f_tp, e1, e2) =>        (*Regra 9*)
       if (teval e1 ((strfun,FunT(arg_tp,f_tp))::(strarg,arg_tp)::env))=f_tp
         then
           teval e2 ((strfun,FunT(arg_tp,f_tp))::env)
         else
           raise WrongRetType
-      |Anon(t,strarg,e) => (*Regra 10*)
-      let
-        val t2 = teval e ((strarg,t)::env)
-      in
+      |Anon(t,strarg,e1) => (*Regra 10*)
+      let 
+        val t2 = teval e1 ((strarg,t)::env)
+      in  
         FunT(t,t2)
       end
-      |Call(e2,e1) =>       (*Regra 11*)(*Verificar*)
-        let
-          val t1 = teval e1 env
-        in
-          case (teval e2 env) of
-             FunT(t1,t2) => t2
-            |_ => raise CallTypeMisM
+      |Call(e1,e2) =>       (*Regra 11*)
+        let val t1 = teval e1 env val t2 = teval e2 env in
+          case (t1) of
+             FunT(a,b) => if (a = t2) then b else raise CallTypeMisM
+            |_ => raise NotFunc
         end
       |If(c,a,b) => if (teval c env)<>BoolT (*Regra 12*)
-        then 
-          raise IfCondNotBool 
+        then
+          raise IfCondNotBool
         else
           if (teval a env)<>(teval b env) then
-            raise DiffBrTypes 
+            raise DiffBrTypes
           else
               teval a env
       |Match(ex,ls) =>                    (*Regra 13*)
         let
           fun checkListType (l: (expr option*expr) list) : bool =
-          if l = nil 
-            then 
-              true 
+          if l = nil
+            then
+              true
             else
-              case #1(hd l) of 
+              case #1(hd l) of
                  SOME(e) => if (teval ex env)=(teval e env)
                   then
                     checkListType (tl l)
                   else
                     false
-                |None => true;
+                |NONE => true;
           fun checkListReturnType [] = true
           | checkListReturnType (_::[]) = true
           | checkListReturnType ((_, e1)::(a, e2)::t) =
@@ -92,23 +97,20 @@ fun teval (e: expr) (env: plcType env) :  plcType =
             else
               raise MatchCondTypesDiff
         end
-      |Prim1(opr,e) => 
-        let 
-          val plcT = teval e env
+      |Prim1(opr,e1) =>
+        let
+          val plcT = teval e1 env
         in
-          case (opr,plcT,e) of
-             ("!",BoolT,_) => BoolT (*Regra 14*)
-            |("-",t,_) => t         (*Regra 15*)
-            |("hd",_,ESeq(SeqT(t))) => raise EmptySeq
-            |("hd",SeqT(t),_) => t      (*Regra 16*)
-            |("tl",_,ESeq(SeqT(t))) => raise EmptySeq
-            |("tl",SeqT(t),_) => SeqT(t) (*Regra 17*) 
-            |("ise",SeqT(t),_) => BoolT  (*Regra 18*)
-            |("ise",_,_) => raise OpNonList
-            |("print",t,_) => ListT(unity_type) (*Regra 19*)
-            |(_,_,_) => raise UnknownType
+          case (opr,plcT) of
+             ("!", BoolT) => BoolT    (*Regra 14*)
+            |("-", IntT) => IntT      (*Regra 15*)
+            |("hd", SeqT t) => t      (*Regra 16*)
+            |("tl", SeqT t) => SeqT t      (*Regra 17*)
+            |("ise",SeqT t) => BoolT  (*Regra 18*)
+            |("print", t) => ListT(unity_type) (*Regra 19*)
+            |(_,_) => raise UnknownType
           end
-      |Prim2(opr,e1,e2) => 
+      |Prim2(opr,e1,e2) =>
         let
           val plcT1 = teval e1 env;
           val plcT2 = teval e2 env
@@ -151,20 +153,11 @@ fun teval (e: expr) (env: plcType env) :  plcType =
             |(";",_,t2) => t2             (*Regra 26*)
             |(_,_,_) => raise UnknownType
         end
-      |Item(i,List(exp_l)) =>             (*Regra 25*)
-        let
-          fun select_element (k: int, l: expr list): expr =
-          if l = [] 
-            then
-              raise ListOutOfRange
-            else
-              if k=1
-                then 
-                  hd l
-                else 
-                  select_element((k-1),(tl l))
-        in
-          teval (select_element(i,exp_l)) env
-        end
+      |Item(i,e1) =>             (*Regra 25*)
+        let val v1 = teval e1 env in
+           case (v1) of
+                  (ListT l) => getItemType (i, l)
+                | (_) => raise OpNonList
+            end
       |(_) => raise UnknownType
     end
