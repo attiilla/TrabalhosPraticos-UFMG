@@ -6,16 +6,14 @@ exception TLEmptySeq
 exception ValueNotFoundInMatch
 exception NotAFunc
 exception EvalError
-exception ListOutOfRange
-exception OpNonList
-
+exception ListOutOfRange2
+exception OpNonList2
 
 fun getItem (n:int, l:plcVal list) =
     case (n, l) of
-          (_, []) => raise ListOutOfRange
+          (_, []) => raise ListOutOfRange2
         | (1, b) => hd b
         | (a, b) => getItem (a-1, tl b);
-
 
 fun eval (e:expr) (env:plcVal env) : plcVal =
     case e of
@@ -61,7 +59,7 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
         | Item (i, e1) => let val v1 = eval e1 env in
             case (v1) of
                   (ListV l) => getItem (i, l)
-                | (_) => raise OpNonList
+                | (_) => raise OpNonList2
             end
         | Match (e1, l) => let val v1 = eval e1 env in if (l = []) then raise ValueNotFoundInMatch else
                                 if isSome (#1 (hd l)) then
