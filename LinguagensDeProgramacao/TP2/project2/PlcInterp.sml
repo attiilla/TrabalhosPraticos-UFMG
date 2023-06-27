@@ -21,7 +21,7 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
     case e of
           ConI i => IntV i
         | ConB b => BoolV b
-        | ESeq (SeqT t) => SeqV[] (*Pode estar com problema: não sei se ESeq é sempre chamada com o primeiro argumento sendo SeqT*)
+        | ESeq (SeqT t) => SeqV[]
         | Var str => lookup env str
         | If (e1, e2, e3) => if (eval e1 env) = BoolV true then eval e2 env else eval e3 env
         | Let (str, e1, e2) => eval e2 ((str, (eval e1 env))::env)
