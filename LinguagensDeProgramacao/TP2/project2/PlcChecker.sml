@@ -7,6 +7,7 @@ exception WrongRetType
 exception DiffBrTypes
 exception IfCondNotBool
 exception NoMatchResults
+exception MatchResTypeDiff
 exception MatchCondTypesDiff
 exception CallTypeMisM
 exception NotFunc
@@ -18,7 +19,6 @@ fun getItemType (n:int, l:plcType list) =
           (_, []) => raise ListOutOfRange
         | (1, b) => hd b
         | (a, b) => getItemType (a-1, tl b);
-
 
 fun teval (e: expr) (env: plcType env) :  plcType =
   let
@@ -83,21 +83,17 @@ fun teval (e: expr) (env: plcType env) :  plcType =
                   else
                     false
                 |NONE => true;
-          fun checkListReturnType [] = true
-          | checkListReturnType (_::[]) = true
-          | checkListReturnType ((_, e1)::(a, e2)::t) =
-            if (teval e1 env) = (teval e2 env)
-              then
-                checkListReturnType((a,e2)::t)
-              else
-                false
+          fun checkMatch (l:(expr option * expr) list, tp:plcType) : bool =
+            if l = [] then true else
+                if ((teval (#2 (hd l)) env) <> tp) then raise MatchResTypeDiff else
+                    checkMatch ((tl l), tp)
         in
-          if checkListType ls
-            then
-              if (ls = []) then raise NoMatchResults else
-              teval (#2(hd ls)) env
-            else
-              raise MatchCondTypesDiff
+          if (ls = []) then raise NoMatchResults else
+            if (checkListType ls) andalso (checkMatch (ls, teval (#2(hd ls)) env))
+              then
+                teval (#2(hd ls)) env
+              else
+                raise MatchCondTypesDiff
         end
       |Prim1(opr,e1) =>
         let
