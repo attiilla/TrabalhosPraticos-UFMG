@@ -63,11 +63,11 @@ fun eval (e:expr) (env:plcVal env) : plcVal =
                   (ListV l) => getItem (i, l)
                 | (_) => raise OpNonList
             end
-        | Match (e1, l) => let val v1 = eval e1 env in
+        | Match (e1, l) => let val v1 = eval e1 env in if (l = []) then raise ValueNotFoundInMatch else
                                 if isSome (#1 (hd l)) then
                                     if v1 = eval (valOf (#1 (hd l))) env then eval (#2 (hd l)) env
                                     else eval (Match(e1, (tl l))) env
-                                else  eval (#2 (hd l)) env
+                                else eval (#2 (hd l)) env
                             end
         | Call (e1, e2) => let val cl = eval e1 env val vl = eval e2 env in
             case (cl) of
