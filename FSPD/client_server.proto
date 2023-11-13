@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package client_server_peers;
+
+service Operations{
+    rpc insertion (Key, Text) returns (Ret_val) {}
+    rpc check (Key) returns (Text) {}
+    rpc activation (Text) returns (?????) {}
+    rpc terminate () returns (Ret_val) {}
+}
+
+message Key {
+    int32 k = 1;
+}
+
+message Text {
+    string s = 1;
+}
+
+message Ret_val{
+    int32 ret = 1
+}
