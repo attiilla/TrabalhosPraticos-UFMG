@@ -3,10 +3,15 @@ syntax = "proto3";
 package client_server_peers;
 
 service Operations{
-    rpc insertion (Key, Text) returns (Ret_val) {}
+    rpc insert (Pair) returns (Ret_val) {}
     rpc check (Key) returns (Text) {}
-    rpc activation (Text) returns (?????) {}
-    rpc terminate () returns (Ret_val) {}
+    rpc activate (Text) returns (Ret_val) {}
+    rpc terminate (Empty) returns (Ret_val) {}
+}
+
+message Pair {
+    int32 key_numb = 1;
+    string msg_text = 2;
 }
 
 message Key {
@@ -18,5 +23,7 @@ message Text {
 }
 
 message Ret_val{
-    int32 ret = 1
+    int32 ret = 1;
 }
+
+message Empty{}
