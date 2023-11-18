@@ -4,7 +4,7 @@ package client_server_peers;
 
 service Operations{
     rpc insert (Pair) returns (Ret_val) {}
-    rpc check (Key) returns (Text) {}
+    rpc check (Key) returns (Ret_text) {}
     rpc activate (Text) returns (Ret_val) {}
     rpc terminate (Empty) returns (Ret_val) {}
 }
@@ -24,6 +24,10 @@ message Text {
 
 message Ret_val{
     int32 ret = 1;
+}
+
+message Ret_text{
+    string ret = 1;
 }
 
 message Empty{}

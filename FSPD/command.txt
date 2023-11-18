@@ -1,3 +1,15 @@
 python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. client_server.proto
+python3 -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. server_server.proto
 
 source /home/atilarticum/Documents/Code/TPs/TrabalhosPraticos-UFMG/FSPD/.venv/bin/activate
+
+
+
+
+talvez seja útil
+'''
+keys_list = list(Operations.data_base.keys())
+text_keys_message = server_server_pb2.Text_keys(s=self_addrss)
+text_keys_message.k.extend(keys_list)
+response = stub.register(text_keys_message)
+'''

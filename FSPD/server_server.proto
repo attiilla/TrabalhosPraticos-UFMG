@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package server_server_peers;
+
+service CentralizedOperations{
+    rpc register (Text_keys) returns (Ret_val) {}
+    rpc mapping (Key) returns (Ret_text){}
+    rpc terminate (Empty) returns (Ret_val) {}
+}
+
+message Key {
+    int32 k = 1;
+}
+
+message Text_keys {
+    string s = 1;
+    repeated int32 k = 2;
+}
+
+message Empty{}
+
+
+message Ret_val{
+    int32 ret = 1;
+}
+
+message Ret_text{
+    string ret = 1;
+}
+
